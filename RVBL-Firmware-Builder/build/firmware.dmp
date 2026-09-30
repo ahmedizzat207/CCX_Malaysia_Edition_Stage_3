@@ -1,0 +1,177 @@
+
+build/firmware.elf:     file format elf32-littleriscv
+
+
+Disassembly of section .text:
+
+00400000 <_start>:
+  400000:	f0000437          	lui	s0,0xf0000
+  400004:	f10004b7          	lui	s1,0xf1000
+  400008:	00842283          	lw	t0,8(s0) # f0000008 <GPIO_BASE+0x8>
+  40000c:	0f02e293          	ori	t0,t0,240
+  400010:	00542423          	sw	t0,8(s0)
+  400014:	00042023          	sw	zero,0(s0)
+
+00400018 <main_loop>:
+  400018:	00442283          	lw	t0,4(s0)
+  40001c:	0012f293          	andi	t0,t0,1
+  400020:	fe028ce3          	beqz	t0,400018 <main_loop>
+  400024:	00042023          	sw	zero,0(s0)
+  400028:	00010937          	lui	s2,0x10
+  40002c:	fff90913          	addi	s2,s2,-1 # ffff <CRC_INIT>
+  400030:	00000993          	li	s3,0
+  400034:	00000a13          	li	s4,0
+  400038:	0e4000ef          	jal	40011c <rx_byte_crc>
+  40003c:	00050a93          	mv	s5,a0
+  400040:	00400c13          	li	s8,4
+
+00400044 <sample_loop>:
+  400044:	0e4000ef          	jal	400128 <rx_word_crc>
+  400048:	00050c93          	mv	s9,a0
+  40004c:	0dc000ef          	jal	400128 <rx_word_crc>
+  400050:	02ac83b3          	mul	t2,s9,a0
+  400054:	02acbe33          	mulhu	t3,s9,a0
+  400058:	007a0a33          	add	s4,s4,t2
+  40005c:	007a3eb3          	sltu	t4,s4,t2
+  400060:	01c989b3          	add	s3,s3,t3
+  400064:	01d989b3          	add	s3,s3,t4
+  400068:	fffc0c13          	addi	s8,s8,-1
+  40006c:	fc0c1ce3          	bnez	s8,400044 <sample_loop>
+  400070:	0e4000ef          	jal	400154 <rx_half>
+  400074:	05251a63          	bne	a0,s2,4000c8 <crc_error>
+  400078:	00100293          	li	t0,1
+  40007c:	005a8863          	beq	s5,t0,40008c <cmd_ok>
+  400080:	00200293          	li	t0,2
+  400084:	005a8463          	beq	s5,t0,40008c <cmd_ok>
+  400088:	0480006f          	j	4000d0 <cmd_error>
+
+0040008c <cmd_ok>:
+  40008c:	002a5b93          	srli	s7,s4,0x2
+  400090:	01e99293          	slli	t0,s3,0x1e
+  400094:	005bebb3          	or	s7,s7,t0
+  400098:	0029d993          	srli	s3,s3,0x2
+  40009c:	01000d93          	li	s11,16
+  4000a0:	00099e63          	bnez	s3,4000bc <trip_relay>
+  4000a4:	039382b7          	lui	t0,0x3938
+  4000a8:	70028293          	addi	t0,t0,1792 # 3938700 <POWER_LIMIT_UW>
+  4000ac:	0172e863          	bltu	t0,s7,4000bc <trip_relay>
+  4000b0:	00200293          	li	t0,2
+  4000b4:	005a8463          	beq	s5,t0,4000bc <trip_relay>
+  4000b8:	0080006f          	j	4000c0 <status_ok>
+
+004000bc <trip_relay>:
+  4000bc:	040ded93          	ori	s11,s11,64
+
+004000c0 <status_ok>:
+  4000c0:	00000b13          	li	s6,0
+  4000c4:	0180006f          	j	4000dc <report>
+
+004000c8 <crc_error>:
+  4000c8:	00100b13          	li	s6,1
+  4000cc:	0080006f          	j	4000d4 <report_error>
+
+004000d0 <cmd_error>:
+  4000d0:	00200b13          	li	s6,2
+
+004000d4 <report_error>:
+  4000d4:	00000b93          	li	s7,0
+  4000d8:	03000d93          	li	s11,48
+
+004000dc <report>:
+  4000dc:	000b0513          	mv	a0,s6
+  4000e0:	09c00f6f          	jal	t5,40017c <tx_byte>
+  4000e4:	000b8513          	mv	a0,s7
+  4000e8:	0b4000ef          	jal	40019c <tx_word>
+  4000ec:	01b42023          	sw	s11,0(s0)
+
+004000f0 <wait_release>:
+  4000f0:	00442283          	lw	t0,4(s0)
+  4000f4:	0012f293          	andi	t0,t0,1
+  4000f8:	fe029ce3          	bnez	t0,4000f0 <wait_release>
+  4000fc:	f1dff06f          	j	400018 <main_loop>
+
+00400100 <rx_byte>:
+  400100:	0084a283          	lw	t0,8(s1) # f1000008 <UART_BASE+0x8>
+  400104:	0022f293          	andi	t0,t0,2
+  400108:	fe028ce3          	beqz	t0,400100 <rx_byte>
+  40010c:	0004a423          	sw	zero,8(s1)
+  400110:	0044a503          	lw	a0,4(s1)
+  400114:	0ff57513          	zext.b	a0,a0
+  400118:	000f0067          	jr	t5
+
+0040011c <rx_byte_crc>:
+  40011c:	fe5fff6f          	jal	t5,400100 <rx_byte>
+  400120:	81250933          	.insn	4, 0x81250933
+  400124:	00008067          	ret
+
+00400128 <rx_word_crc>:
+  400128:	00000593          	li	a1,0
+  40012c:	00000313          	li	t1,0
+
+00400130 <rxwc_loop>:
+  400130:	fd1fff6f          	jal	t5,400100 <rx_byte>
+  400134:	81250933          	.insn	4, 0x81250933
+  400138:	006513b3          	sll	t2,a0,t1
+  40013c:	0075e5b3          	or	a1,a1,t2
+  400140:	00830313          	addi	t1,t1,8
+  400144:	02000e13          	li	t3,32
+  400148:	ffc314e3          	bne	t1,t3,400130 <rxwc_loop>
+  40014c:	00058513          	mv	a0,a1
+  400150:	00008067          	ret
+
+00400154 <rx_half>:
+  400154:	00000593          	li	a1,0
+  400158:	00000313          	li	t1,0
+
+0040015c <rxh_loop>:
+  40015c:	fa5fff6f          	jal	t5,400100 <rx_byte>
+  400160:	006513b3          	sll	t2,a0,t1
+  400164:	0075e5b3          	or	a1,a1,t2
+  400168:	00830313          	addi	t1,t1,8
+  40016c:	01000e13          	li	t3,16
+  400170:	ffc316e3          	bne	t1,t3,40015c <rxh_loop>
+  400174:	00058513          	mv	a0,a1
+  400178:	00008067          	ret
+
+0040017c <tx_byte>:
+  40017c:	0084a283          	lw	t0,8(s1)
+  400180:	0042f293          	andi	t0,t0,4
+  400184:	fe028ce3          	beqz	t0,40017c <tx_byte>
+  400188:	00a4a023          	sw	a0,0(s1)
+  40018c:	0084a283          	lw	t0,8(s1)
+  400190:	0012e293          	ori	t0,t0,1
+  400194:	0054a423          	sw	t0,8(s1)
+  400198:	000f0067          	jr	t5
+
+0040019c <tx_word>:
+  40019c:	00050593          	mv	a1,a0
+  4001a0:	00400313          	li	t1,4
+
+004001a4 <txw_loop>:
+  4001a4:	0ff5f513          	zext.b	a0,a1
+  4001a8:	fd5fff6f          	jal	t5,40017c <tx_byte>
+  4001ac:	0085d593          	srli	a1,a1,0x8
+  4001b0:	fff30313          	addi	t1,t1,-1
+  4001b4:	fe0318e3          	bnez	t1,4001a4 <txw_loop>
+  4001b8:	00008067          	ret
+
+Disassembly of section .riscv.attributes:
+
+00000000 <.riscv.attributes>:
+   0:	2241                	.insn	2, 0x2241
+   2:	0000                	.insn	2, 0x
+   4:	7200                	.insn	2, 0x7200
+   6:	7369                	.insn	2, 0x7369
+   8:	01007663          	bgeu	zero,a6,14 <OUT_DONE+0x4>
+   c:	0018                	.insn	2, 0x0018
+   e:	0000                	.insn	2, 0x
+  10:	7205                	.insn	2, 0x7205
+  12:	3376                	.insn	2, 0x3376
+  14:	6932                	.insn	2, 0x6932
+  16:	7032                	.insn	2, 0x7032
+  18:	5f31                	.insn	2, 0x5f31
+  1a:	6d7a                	.insn	2, 0x6d7a
+  1c:	756d                	.insn	2, 0x756d
+  1e:	316c                	.insn	2, 0x316c
+  20:	3070                	.insn	2, 0x3070
+	...

@@ -1,72 +1,51 @@
-# ChampionCHIP eXperience — Stage 3
+# ChampionCHIP eXperience - Stage 3
 
-Welcome to **Stage 3 of the ChampionCHIP eXperience!** 🚀
+This repository collects the Stage 3 GPIO/UART test firmware, RV32I firmware builder, and RVBL emulator documentation. It is based on the [official CCX Malaysia Stage 3 repository](https://github.com/championchip-experience-community/CCX_Malaysia_Edition_Stage_3) and documents how these resources relate to the [RVBL-2 multicycle RISC-V hardware project](https://github.com/ahmedizzat207/riscv32_multicycle).
 
-> **⚠️ Important — AWS FPGA**
->
-> For this part of Stage 3, **you do not need to run your project on the AWS FPGA**.
->
-> AWS FPGA access will be required **later only for the 10 best teams**, after the classification results are announced. For now, focus on the activities and instructions provided in this repository.
+## Hardware project
 
-This repository contains the resources and instructions you will need during this stage.
+The RVBL-2 repository contains the processor RTL, GPIO and UART peripherals, and their interface definitions. The firmware in this repository exercises those memory-mapped peripherals, while the emulator documentation describes the GPIO/UART protocol used to communicate with a processor integrated into the AWS FPGA environment. Check the hardware repository for its current memory map and implementation details when adapting the firmware.
 
-The repository is divided into **three main folders**. Each folder contains its own **README** with detailed instructions. Please read the README inside each folder before starting.
+AWS FPGA access is not required for the current local development stage. The official challenge instructions determine when FPGA access is needed.
 
-## 📁 1. Official Test Firmware
+## Resources
 
-**Folder:** `1-RVBL-GPIO-UART-Test-Firmware`
+### GPIO and UART test firmware
 
-This folder contains the **official Stage 3 test firmware** for GPIO and UART and the files required to work with it.
+Folder: `RVBL-GPIO-UART-Test-Firmware`
 
-Inside the folder, you will find a dedicated README explaining the firmware, its structure, and how it should be used during the challenge.
+Contains the official test firmware and instructions for validating GPIO and UART behavior in a local processor simulation. See its [README](RVBL-GPIO-UART-Test-Firmware/README.md).
 
-➡️ **Start here and read the README before using the firmware.**
+### RVBL firmware builder
 
----
+Folder: `RVBL-Firmware-Builder`
 
-## 📁 2. RVBL Firmware Builder
+Contains a Makefile and scripts for assembling RV32I source and generating instruction-memory firmware. See its [README](RVBL-Firmware-Builder/README.md).
 
-**Folder:** `2-RVBL-Firmware-Builder`
+### RVBL emulator
 
-This folder contains the **Makefile and instructions for generating your own RISC-V firmware**.
+Folder: `RVBL-Emulator`
 
-The README will guide you through the process of using the provided Makefile to compile your **RISC-V assembly code** and generate the firmware file required for your processor.
+Documents emulator options, GPIO/UART data flow, and the FPGA register interface. See its [README](RVBL-Emulator/README.md).
 
-➡️ **Read the README and follow the steps to generate your firmware.**
-
----
-
-## 📁 3. RVBL Emulator
-
-**Folder:** `3-RVBL-Emulator`
-
-This folder contains the resources for the **RVBL Emulator Application**.
-
-The emulator will be introduced **later in Stage 3** and will allow you to interact with and test your RISC-V processor in a more complete application environment.
-
-The README inside this folder will provide the instructions for setting up and using the emulator when we reach this part of Stage 3.
-
-➡️ **Instructions for the RVBL Emulator will be provided later in Stage 3.**
-
----
-
-## 🚀 Repository Structure
+## Repository structure
 
 ```text
-Stage-3/
-│
-├── 1-RVBL-GPIO-UART-Test-Firmware/
-│   ├── README.md
-│   └── ...
-│
-├── 2-RVBL-Firmware-Builder/
-│   ├── README.md
-│   ├── Makefile
-│   └── ...
-│
-├── 3-RVBL-Emulator/
-│   ├── README.md
-│   └── ...
-│
+.
+├── RVBL-Emulator/
+├── RVBL-Firmware-Builder/
+├── RVBL-GPIO-UART-Test-Firmware/
 └── README.md
 ```
+
+## Acknowledgements
+
+The Stage 3 challenge resources are maintained by the [ChampionCHIP eXperience community](https://github.com/championchip-experience-community). The RVBL-2 hardware project acknowledges **Equipe 15**:
+
+- Ahmed Izzat Sidahmed Ali Tahir
+- Ng Kah Lok
+- Gan Shao Hng
+- Jolin Tan
+- Fatin Nuralya Binti Mohamad
+
+Thanks also to the ChampionCHIP eXperience organizing committee, the project mentors, and the ChipInventor platform team for the challenge framework, tools, and technical guidance.
